@@ -1,0 +1,55 @@
+{
+  "variables": {
+    "region": "us-east-2",
+    "source_ami": "ami-d5bf2caa",
+    "subnet_id": "subnet-08dd6c996ab484011",
+    "vpc_id": "vpc-0500deafac02553e8"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "ami_name": "jenkins-docker-ci-cd-ecs-{{isotime \"2006-01-02\"}}",
+      "associate_public_ip_address": true,
+      "communicator": "ssh",
+      "instance_type": "t2.large",
+      "profile": "rv-lab",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "amzn-ami-*.*.i-amazon-ecs-optimized",
+          "root-device-type": "ebs"
+        },
+        "owners": [
+          "137112412989",
+          "591542846629",
+          "801119661308",
+          "102837901569",
+          "013907871322",
+          "206029621532",
+          "286198878708",
+          "443319210888"
+        ],
+        "most_recent": true
+      },
+      "ssh_username": "ec2-user",
+      "subnet_id": "{{ user `subnet_id` }}",
+      "vpc_id": "{{ user `vpc_id` }}",
+      "run_tags": {
+        "Name": "jenkins-docker-ci-cd-ecs-image-builder"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "docker pull node:latest",
+        "docker pull golang:latest",
+        "docker pull microsoft/dotnet:2.0-sdk",
+        "docker pull microsoft/aspnetcore:2.0",
+        "docker pull alpine:latest"
+      ]
+    }
+  ]
+}
